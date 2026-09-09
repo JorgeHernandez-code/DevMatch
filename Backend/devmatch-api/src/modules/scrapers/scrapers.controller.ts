@@ -7,17 +7,17 @@ export class ScrapersController {
   constructor(private readonly scrapersService: ScrapersService) {}
 
   @Get('remoteok')
-  async remoteJobs() {
+  remoteJobs() {
     return this.scrapersService.getRemoteJobs();
   }
 
   @Post('remoteok/import')
-  async importRemoteOk() {
+  importRemoteOk() {
     return this.scrapersService.importRemoteOkJobs();
   }
 
   @Post('analyze')
-  async analyzeJobs() {
-  return this.scrapersService.analyzeJobs();
+  analyzeJobs() {
+    return this.scrapersService.analyzeJobs();
   }
 }

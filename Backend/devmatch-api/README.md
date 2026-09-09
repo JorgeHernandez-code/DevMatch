@@ -1,98 +1,77 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# DevMatch API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend de DevMatch, construido con **NestJS + TypeScript + PostgreSQL (TypeORM)**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Importa vacantes tech desde la API pública de [RemoteOK](https://remoteok.com/api),
+las normaliza y persiste, y extrae habilidades técnicas de las descripciones.
 
-## Description
+## Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- NestJS 11
+- TypeORM + PostgreSQL (`pg`)
+- `@nestjs/axios` para el scraping
+- `class-validator` / `class-transformer` para validación de DTOs
+- Swagger (`@nestjs/swagger`) para documentación de la API
 
-## Project setup
+## Puesta en marcha
 
 ```bash
-$ npm install
+npm install
+
+# configura la base de datos
+cp .env.example .development.env   # y edita las credenciales
+
+npm run start:dev
 ```
 
-## Compile and run the project
+- API: `http://localhost:3000/api`
+- Docs (Swagger): `http://localhost:3000/docs`
+
+Necesitas una instancia de PostgreSQL accesible y una base de datos vacía con el
+nombre de `DB_DATABASE`. Con `DB_SYNCHRONIZE=true` las tablas se crean solas a
+partir de las entidades (solo recomendado en desarrollo).
+
+## Endpoints principales
+
+| Método | Ruta                       | Descripción                                             |
+| ------ | -------------------------- | ------------------------------------------------------- |
+| GET    | `/api`                     | Información y estado de la API                          |
+| GET    | `/api/jobs`                | Lista las vacantes almacenadas                          |
+| GET    | `/api/skills`              | Lista el catálogo de habilidades                        |
+| GET    | `/api/users`               | Lista usuarios                                          |
+| POST   | `/api/users`               | Crea un usuario (`fullName`, `email`, `skills[]`)       |
+| GET    | `/api/scrapers/remoteok`   | Devuelve el feed crudo de RemoteOK                      |
+| POST   | `/api/scrapers/remoteok/import` | Importa vacantes nuevas de RemoteOK               |
+| POST   | `/api/scrapers/analyze`    | Extrae habilidades de las descripciones almacenadas     |
+
+## Scripts
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev   # desarrollo con watch
+npm run build       # compila a dist/
+npm run start:prod  # ejecuta dist/main
+npm run lint        # eslint --fix
+npm test            # tests unitarios (jest)
 ```
 
-## Run tests
+## Estructura
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+src/
+├── config/typeorm.ts          # configuración de la conexión
+├── modules/
+│   ├── jobs/                   # vacantes (entidad Job, Job↔Skill)
+│   ├── skills/                 # catálogo de habilidades
+│   ├── users/                  # usuarios (CRUD)
+│   ├── scrapers/               # importación desde RemoteOK
+│   └── ai/                     # SkillExtractorService (extracción por keywords)
+├── app.module.ts
+└── main.ts
 ```
 
-## Deployment
+## Estado
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Backend funcional para importar y consultar vacantes y extraer habilidades.
+El motor de matching (comparar un perfil contra las vacantes y devolver un
+porcentaje de compatibilidad) todavía no está implementado — ver el roadmap en
+el [README raíz](../../README.md).
